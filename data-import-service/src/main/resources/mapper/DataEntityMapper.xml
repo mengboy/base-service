@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.study.mapper.DataEntityMapper" >
+  <resultMap id="BaseResultMap" type="com.study.model.DataEntity" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="data_type" property="dataType" jdbcType="VARCHAR" />
+    <result column="data_from" property="dataFrom" jdbcType="VARCHAR" />
+  </resultMap>
+  <resultMap id="countMap" type="com.study.model.CountEntity">
+    <result column="num" property="num" jdbcType="INTEGER"/>
+    <result column="data_type" property="dataType" jdbcType="VARCHAR"/>
+    <result column="data_from" property="dataFrom" jdbcType="VARCHAR"/>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, title, data_type, data_from
+  </sql>
+
+  <select id="countMap" resultMap="countMap" parameterType="java.util.Map">
+    SELECT COUNT(*) AS num,
+    <if test="parameters.dataType != null">
+      data_type
+    </if>
+    <if test="parameters.dataFrom != null">
+      data_from
+    </if>
+    from data_entity GROUP BY
+    <if test="parameters.dataType != null">
+      data_type
+    </if>
+    <if test="parameters.dataFrom != null">
+      data_from
+    </if>
+  </select>
+</mapper>

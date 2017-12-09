@@ -1,0 +1,57 @@
+<configuration>   
+   
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">   
+    <!-- encoder 默认配置为PatternLayoutEncoder -->   
+    <encoder>   
+      <pattern>%-5level %d{HH:mm:ss.SSS} [%thread] %logger{36} - %msg%n</pattern>   
+    </encoder>   
+  </appender> 
+  
+  <appender name="FILE" class="ch.qos.logback.core.FileAppender">  
+    <file>logs/master.log</file>
+    <append>true</append>  
+    <encoder>  
+      <pattern>%-5level %d{HH:mm:ss.SSS} [%thread] %logger{36} - %msg%n</pattern>  
+    </encoder>  
+  </appender> 
+  
+  <appender name="SDKLOGFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">   
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">   
+      <fileNamePattern>logs/sdkaccesslogFile.%d{yyyy-MM-dd}.log</fileNamePattern>   
+      <maxHistory>0</maxHistory>
+    </rollingPolicy>   
+    <encoder>   
+      <pattern>%-5level %d{HH:mm:ss.SSS} - %msg%n</pattern>   
+    </encoder>   
+  </appender>
+
+
+  <root level="INFO">             
+    <appender-ref ref="FILE" /> 
+    <appender-ref ref="STDOUT" /> 
+  </root> 
+
+  
+  <appender name="LOGFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">   
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">   
+      <fileNamePattern>logs/logFile.%d{yyyy-MM-dd}.log</fileNamePattern>   
+      <maxHistory>0</maxHistory>
+    </rollingPolicy>   
+    <encoder>   
+      <pattern>%msg%n</pattern>   
+    </encoder>   
+  </appender>
+  
+  <logger level="INFO" name="com.dealmoon.app.controllers.Log" additivity="false">
+    <appender-ref ref="LOGFILE" />
+  </logger>
+
+  <!--<appender name="SEARCH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">-->
+    <!--<destination>120.24.68.108:4560</destination>-->
+    <!--<reconnectionDelay>1 second</reconnectionDelay>-->
+    <!--<encoder class="net.logstash.logback.encoder.LogstashEncoder" />-->
+  <!--</appender>-->
+
+
+
+ </configuration>

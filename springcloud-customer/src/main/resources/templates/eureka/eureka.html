@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>eureka</title>
+</head>
+<body>
+
+</body>
+<script type="text/javascript" th:src="@{/js/jquery-1.11.2.min.js}"></script>
+<script>
+    $.post("eureka/getEurekaUrl", function (result) {
+        window.location.href = "http://" + result;
+    })
+</script>
+</html>

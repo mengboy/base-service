@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.study.mapper.UserLogMapper" >
+  <resultMap id="BaseResultMap" type="com.study.model.UserLog" >
+    <id column="log_id" property="logId" jdbcType="INTEGER" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="login_time" property="loginTime" jdbcType="TIMESTAMP" />
+    <result column="logout_time" property="logoutTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <update id="updateByUserIdLoginTime" parameterType="com.study.model.UserLog">
+    UPDATE user_login_log SET logout_time = #{logoutTime}
+    WHERE user_id = #{userId} AND login_time = #{loginTime}
+  </update>
+  <select id="selectAllCount" resultType="java.lang.Long">
+    SELECT COUNT(log_id) FROM user_login_log;
+  </select>
+  <select id="selectPage" resultMap="BaseResultMap" parameterType="com.study.common.QueryBase">
+    SELECT * FROM user_login_log ORDER BY log_id DESC limit ${limit_start}, ${pageSize}
+  </select>
+
+
+</mapper>

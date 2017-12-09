@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/jquery.dataTables.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/matrix-style.css}" />
+    <link rel="stylesheet" th:href="@{/css/matrix-media.css}" />
+    <link th:href="@{/font-awesome/css/font-awesome.css}" rel="stylesheet" />
+    <title>数据管理</title>
+</head>
+<body>
+
+<!--Header-part-->
+<div id="header">
+    <h1><a href="dashboard.html">Matrix Admin</a></h1>
+</div>
+<!--close-Header-part-->
+
+<!--top-Header-menu-->
+<div th:include="common/top :: top"></div>
+<div th:include="common/menu :: menu"></div>
+
+<div id="content">
+    <div id="content-header">
+        <div id="breadcrumb"> <a href="#" title="Go to Home" class="tip-bottom"><i class="icon-home"></i> Home</a> <a href="#" class="current">Tables</a> </div>
+    </div>
+    <div class="container-fluid">
+        <hr>
+        <div class="row-fluid">
+            <div class="span12">
+                <div id="dataShow">
+                    <div class="widget-box">
+                        <div class="widget-title"> <span class="icon"><i class="icon-th"></i></span>
+                            <h5>数据列表</h5>
+                        </div>
+                        <form class="form-inline">
+                            <div style="width: 335px; margin-right: 1px; float: right">
+                                <!--<input class="form-control" id="serviceName" name="serviceName"  type="text" placeholder="输入微服务名称"/>-->
+                                <select class="form-control" id="serviceName">
+                                    <option value="选择微服务">选择微服务</option>
+
+                                </select>
+                                <button type="button" id="dataImport" class="btn btn-info" style="margin-right: 1px;">导入</button>
+                                <button type="button" onclick="$('#countParamsModal').modal();" class="btn btn-info" style="margin-left:10px">数据统计</button>
+                            </div>
+                        </form>
+                        <table class="table table-bordered data-table" id="table" >
+                            <thead>
+
+                            </thead>
+                        </table>
+                        <div class="bottom">
+                            <div class="dataTables_paginate fg-buttonset ui-buttonset fg-buttonset-multi ui-buttonset-multi paging_full_numbers" id="datatable_paginate">
+                                <!--<a class="fg-button ui-button ui-state-default first ui-state-disabled" aria-controls="datatable" data-dt-idx="0" tabindex="0" id="datatable_first">First</a>-->
+                                <a class="fg-button ui-button ui-state-default previous" aria-controls="datatable" data-dt-idx="1" tabindex="0" id="datatable_previous">Previous</a>
+
+                                <a class="fg-button ui-button ui-state-default next" aria-controls="datatable" data-dt-idx="4" tabindex="0" id="datatable_next">Next</a>
+                                <!--<a class="fg-button ui-button ui-state-default last" aria-controls="datatable" data-dt-idx="5" tabindex="0" id="datatable_last">Last</a>-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="char" style="display: none">
+                    <!--<canvas id="myChart" width="400" height="400"></canvas>-->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+
+<!--数据count param 弹窗-->
+<div class="modal fade" id="countParamsModal" tabindex="-1" role="dialog" aria-labelledby="addroleLabel" >
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="addroleLabel">数据统计项</h4>
+            </div>
+            <div class="modal-body" >
+                <form id="countParamsForm">
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" onclick="dataCount()"  class="btn btn-primary">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<!--Footer-part-->
+<div class="row-fluid">
+    <div id="footer" class="span12"> 2017 &copy; yqj <a href="http://themedesigner.in/">Themedesigner.in</a> </div>
+</div>
+<!--end-Footer-part-->
+<script th:src="@{/js/jquery-1.11.2.min.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}" th:sr></script>
+<script th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script th:src="@{/js/layer.js}"></script>
+<script th:src="@{/js/char/Chart.js}"></script>
+
+<script type="text/javascript">
+
+    function importData(pageSize, requestPage, serviceName) {
+        var para = {
+            "serviceName": serviceName,
+            "pageSize": pageSize,
+            "requestPage":requestPage
+        };
+        var data = JSON.stringify(para);
+        $.ajax({
+            contentType: "application/json",
+            cache: true,
+            type: "POST",
+            url:'microservices/data',
+            data: data,
+            dataType: "json",
+            async: false,
+            success: function(data) {
+
+                if(data.status === 0){
+                    $("tr").remove(".tableHead");
+                    $("tr").remove(".tableBody");
+                    $("p").remove(".countParams");
+                    //添加表头
+                    var head = "<tr class=" + "tableHead>";
+                    var countParam = "";
+                    for(key in data.tableHead){
+                        head += "<th class='sorting_disabled ui-state-default'>"
+                            + "<div class='DataTables_sort_wrapper'>"
+                            +  data.tableHead[key]
+                            + "</div>"
+                            + "</th>";
+                        countParam += "<p class='countParams'>"
+                            + "<input  style='margin-left: 40%; margin-right: 30px' type='checkbox' name='countParam' class='countParam' value='" + key + "'>"
+                            + "<span id='p" + key + "'>" + data.tableHead[key] + "</span>"
+                            +"</p>";
+                    }
+                    head += "</tr>";
+                    $("#table").append(head);
+                    $("#countParamsForm").append(countParam);
+
+                    //添加数据
+                    for(let i = 0; i < data.data.length; i++){
+                        var newBodyRow = "<tr class=" + "tableBody>";
+                        for(key in data.data[i]){
+                            newBodyRow += "<td>" + data.data[i][key] + "</td>";
+                        }
+                        newBodyRow += "</tr>";
+                        $("#table").append(newBodyRow);
+                    }
+                }
+            }
+        });
+    }
+
+    var pageSize = 10;
+    var requestPage = 1;
+
+    $("#dataImport").click(function () {
+        var serviceName = $("#serviceName").find("option:selected").val();
+        importData(pageSize, requestPage, serviceName);
+    });
+
+
+    $("#datatable_next").click(function () {
+        requestPage += 1;
+        var serviceName = $("#serviceName").find("option:selected").val();
+        importData(pageSize, requestPage, serviceName);
+    })
+
+    $("#datatable_previous").click(function () {
+        requestPage -= 1;
+        var serviceName = $("#serviceName").find("option:selected").val();
+        importData(pageSize, requestPage, serviceName);
+    });
+
+
+    /**
+     * 随机获取颜色
+     * @returns {string}
+     */
+    var getRandomColor = function(){
+        return  '#' + (function(color){
+            return (color +=  '0123456789abcdef'[Math.floor(Math.random()*16)])
+            && (color.length == 6) ?  color : arguments.callee(color);
+        })('');
+    }
+
+
+    /**
+     * 数据统计
+     */
+    function dataCount() {
+        var serviceName = $("#serviceName").find("option:selected").val();
+        var val = {
+            "serviceName": serviceName
+        };
+        $("input[name='countParam']:checked").each(function () {
+            var param = this.value;
+            val[param] = $("#p" + param + "" ).html();
+        });
+        var params = JSON.stringify(val);
+        $.ajax({
+            contentType: "application/json",
+            cache: true,
+            type: "POST",
+            url:'microservices/dataCount',
+            data: params,
+            dataType: "json",
+            async: false,
+            success: function(data) {
+                if(data.status === 0){
+                    $("#dataShow").hide();
+                    $("#char").show();
+                    var charDatas = [];
+                    var charLabels = [];
+                    var pieDatas = [];
+                    $("div").remove(".charBody");
+                    for(let i = 0; i < data.result.length; i++){
+                        var size = Math.sqrt(160000 / data.result.length);
+                        for(key in data.result[i]){
+                            var div = "<div style='margin-bottom: 20px; margin-top: 20px' class='charBody'>"
+                                + "<canvas height=' " + size + "px' width='" + size + "px' style='margin-right: 20%' id='bar" + key + "'></canvas>"
+                                + "<canvas height=' " + size + "px' width='" + size + "px' id='pie" + key + "'></canvas>"
+                                + "</div>";
+                            $("#char").append(div);
+                            for(let j = 0; j < data.result[i][key].length; j++){
+                                var num = data.result[i][key][j]["num"];
+                                var countParam = data.result[i][key][j][key];
+                                charDatas.push(num);
+                                charLabels.push(countParam);
+
+                                var pieData = {
+                                    value: data.result[i][key][j]["num"],
+                                    color: getRandomColor(),
+                                    label: countParam
+                                };
+
+                                pieDatas.push(pieData);
+
+                            }
+                            var barCtx = document.getElementById("bar" + key).getContext("2d");
+                            var barChartData = {
+                                labels: charLabels,
+                                datasets:[
+                                    {
+                                        fillColor : "rgba(151,187,205,0.5)",
+                                        strokeColor : "rgba(151,187,205,1)",
+                                        data : charDatas
+                                    }
+                                ]
+                            };
+                            var barChar = new Chart(barCtx).Bar(barChartData);
+
+                            var pieCtx = document.getElementById("pie" + key).getContext("2d");
+                            var pieChar = new Chart(pieCtx).Pie(pieDatas);
+
+                        }
+                    }
+
+                    alert(JSON.stringify(pieDatas));
+                    $('#countParamsModal').modal('hide');
+                }
+            }
+        });
+    }
+
+    $.ajax({
+        contentType: "application/json",
+        cache: true,
+        type: "POST",
+        url:'eureka/getServiceName',
+        data: "",
+        dataType: "json",
+        async: false,
+        success: function(data) {
+            for(let i = 0; i < data.length; i++){
+                let option = "<option value='"+ data[i] +"'>" + data[i] + "</option>";
+                $("#serviceName").append(option);
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
