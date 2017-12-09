@@ -4,5 +4,5 @@
 *.iml
 */target
 */logs
-logs/*.log
+logs
 
